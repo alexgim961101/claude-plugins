@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "alexgim961101-plugins",
+  "description": "Personal Claude Code plugins marketplace",
+  "owner": {
+    "name": "alexgim961101"
+  },
+  "plugins": [
+    {
+      "name": "smart-plan",
+      "description": "Critical, multi-agent feature planning — risk analysis, architecture alternatives, and implementation unit breakdown before writing code",
+      "version": "1.0.0",
+      "author": {
+        "name": "alexgim961101"
+      },
+      "source": "./plugins/smart-plan",
+      "category": "productivity",
+      "strict": false
+    }
+  ]
+}
