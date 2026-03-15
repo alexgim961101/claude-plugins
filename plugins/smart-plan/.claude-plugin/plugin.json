@@ -1,0 +1,7 @@
+{
+  "name": "smart-plan",
+  "description": "Critical, multi-agent feature planning tool. Analyzes requirements, risks, alternatives, and breaks work into small human-reviewable implementation units.",
+  "author": {
+    "name": "alex"
+  }
+}
