@@ -48,5 +48,5 @@ plans/{feature-name}.md
 ## Installation
 
 ```
-/plugins install github:{your-username}/smart-plan
+/plugin install smart-plan@alexgim961101-claude-plugins
 ```
