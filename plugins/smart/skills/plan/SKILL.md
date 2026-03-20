@@ -190,6 +190,7 @@ Then ask: **"구현 계획이 생성되었습니다. 각 문서를 검토해 주
 
 - Be critical — challenge the user's initial assumptions
 - Each small feature unit must be **independently reviewable** in one sitting
-- No real code in any plan document — Korean descriptions and pseudocode only
+- **IMPL_PLAN 문서에 코드 블록(```) 사용 금지** — 추천 커밋 메시지만 예외. 함수 시그니처, import문, 변수 선언 등 프로그래밍 언어 문법을 포함하지 않는다. 동작 흐름은 번호 매긴 한글 문장으로만 표현한다.
 - Every IMPL_PLAN must include a **recommended English commit message**
 - Pseudocode will become inline code comments during `/impl`, so write it clear and concise
+- 실제 코드는 `/impl` 실행 시에만 코드베이스에 작성된다. 계획 문서는 순수하게 한글 설명만 포함한다.
