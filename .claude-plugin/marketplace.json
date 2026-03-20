@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "smart",
-      "description": "Critical, multi-agent feature planning — risk analysis, architecture alternatives, and implementation unit breakdown before writing code",
-      "version": "1.0.0",
+      "description": "Full development workflow — PRD, tech spec, feature planning, TDD implementation, and multi-agent code review, all optimized for human reviewability",
+      "version": "2.0.0",
       "author": {
         "name": "alexgim961101"
       },

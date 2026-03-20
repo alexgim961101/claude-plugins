@@ -1,6 +1,6 @@
 {
   "name": "smart",
-  "description": "Critical, multi-agent feature planning tool. Analyzes requirements, risks, alternatives, and breaks work into small human-reviewable implementation units.",
+  "description": "Full development workflow plugin — PRD, tech spec, feature planning, TDD implementation, and multi-agent code review. All outputs optimized for human reviewability.",
   "author": {
     "name": "alex"
   }

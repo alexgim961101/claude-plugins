@@ -1,132 +1,195 @@
 ---
 name: plan
 description: >
-  Use this skill when the user wants to plan a feature, design a new capability, or think through an implementation before writing code.
-  Triggers on phrases like "기획", "계획 세워줘", "어떻게 구현할까", "설계해줘", "플랜 짜줘", "feature plan", "let's plan", "before we implement", or when the user describes a feature and asks how to approach it.
-  Always use this skill proactively when a non-trivial feature discussion begins, even if the user hasn't explicitly asked for a plan.
-version: 1.0.0
+  Plan a feature with multi-agent risk analysis, architecture review, and implementation plans.
+  Generates docs/FEATURE_PLAN.md (feature decomposition into big/small logical units) and
+  docs/IMPL_PLAN_*.md (Korean pseudocode implementation plans per small unit — no real code).
+  Use this skill whenever the user says "기획", "계획 세워줘", "어떻게 구현할까", "설계해줘", "플랜 짜줘",
+  "기능 분해", "구현 계획", "feature plan", "let's plan", "before we implement", or describes a feature and asks how to approach it.
+  Always use this skill proactively when a non-trivial feature discussion begins, even without explicit request.
+version: 2.0.0
 ---
 
-# Smart Plan
+# Plan — Feature Planning & Implementation Plans
 
-A critical, multi-agent feature planning skill that produces a structured, human-reviewable plan before any code is written.
+Decompose a feature into logical units and generate implementation plans for each unit.
 
-## When This Skill Applies
+This skill's outputs feed directly into `/impl`, where pseudocode becomes inline code comments.
+The clearer the pseudocode, the easier the final code review.
+Pseudocode expresses **intent (WHAT)**, code expresses **mechanism (HOW)** — reviewers check alignment between the two.
 
-- User wants to plan or design a feature
-- User describes a new capability and asks how to approach it
-- User wants to think through trade-offs before implementing
+## When to Apply
+
+- Designing or planning a feature
+- Reviewing approach before implementation
 - User invokes `/plan`
 
-## Process
+## Process (Two Phases)
 
-### Step 1a: Clarify (if needed)
+### Phase 1: Generate FEATURE_PLAN.md
 
-If the feature description is vague or incomplete, ask **up to 3 targeted clarifying questions**. Wait for the user's response before proceeding to Step 1b.
+#### Step 1: Clarify Requirements
 
-### Step 1b: Scan Codebase
+If the description is vague, ask **up to 3** targeted questions. Wait for response.
 
-Once the feature description is clear, scan the following in order:
-1. `CLAUDE.md` (project conventions — always read first)
-2. Top-level project structure (`ls` only — do not recursively read)
-3. Key config files: `package.json`, `build.gradle`, `docker-compose.yml`, `pom.xml` (whichever exist)
-4. Up to 5 source files most relevant to the feature (use Glob with feature keywords, not a full tree scan)
+#### Step 2: Scan Codebase
 
-Summarize findings as `CODEBASE_CONTEXT`: tech stack, key conventions, relevant modules.
+Check in order:
+1. `CLAUDE.md` — project conventions
+2. `docs/PRD.md`, `docs/SPEC.md`, `docs/FEATURE_LIST.md` — prior documents
+3. Top-level project structure (ls only)
+4. Key config files (`package.json`, `build.gradle`, `go.mod`, etc.)
+5. Up to 5 relevant source files (Glob with keywords)
 
-### Step 2: Launch Agents
+Summarize as `CODEBASE_CONTEXT`.
 
-Run **Agent A (Risk Analyst)** and **Agent B (Architecture Reviewer)** in parallel using the Agent tool.
+#### Step 3: Launch Analysis Agents (Parallel)
+
+Run two agents **simultaneously** using the Agent tool.
 
 **Agent A — Risk Analyst**
-Read `agents/risk-analyst.md`. Fill in:
-- `{{FEATURE_DESCRIPTION}}`: full feature description
-- `{{CODEBASE_CONTEXT}}`: focus on external dependencies, transaction patterns, security config
+Read `agents/risk-analyst.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
 
 **Agent B — Architecture Reviewer**
-Read `agents/arch-reviewer.md`. Fill in:
-- `{{FEATURE_DESCRIPTION}}`: full feature description
-- `{{CODEBASE_CONTEXT}}`: focus on existing architectural patterns, tech stack, infra
+Read `agents/arch-reviewer.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
 
-After Agent B completes, extract the `### 추천:` block as `RECOMMENDED_APPROACH`.
-- If Agent B did not produce a clear recommendation, use the fallback: `"추천 접근법 미확정 — 별도 아키텍처 결정 필요"`
+Extract `RECOMMENDED_APPROACH` from Agent B's `### 추천:` block.
+If no clear recommendation, use fallback: `"추천 접근법 미확정 — 별도 아키텍처 결정 필요"`
 
-Then run **Agent C (Unit Planner)**:
+#### Step 4: Generate FEATURE_PLAN.md
 
-**Agent C — Unit Planner**
-Read `agents/unit-planner.md`. Fill in:
-- `{{FEATURE_DESCRIPTION}}`: full feature description
-- `{{RECOMMENDED_APPROACH}}`: from Agent B (or fallback above)
-- `{{CODEBASE_CONTEXT}}`: focus on directory structure, coding conventions
+Write `docs/FEATURE_PLAN.md` with this structure:
 
-### Step 3: Draft Supporting Sections
+```markdown
+# {기능명} — Feature Plan
 
-Draft the following yourself based on the feature and agent outputs:
+> 생성일: {YYYY-MM-DD}
+> 상태: 초안 (검토 필요)
 
-**API 인터페이스 초안**
-- List key endpoints or method signatures
-- Show essential request/response shape (not full schema — just the important fields)
-- Mark which are new vs modified
+---
 
-**데이터 모델 초안**
-- List key entities and their critical fields
-- Show relationships (1:N, N:M, etc.)
-- Highlight any schema migrations required
+## 목표
 
-**기술적 고려사항**
-- Performance: expected load, bottlenecks, caching needs
-- Security: auth boundaries, input validation, data sensitivity
-- Scalability: horizontal scaling considerations, data growth
+한 문장으로 이 기능의 목적을 정의한다.
 
-**미결 사항 (Open Questions)**
-- List any decisions that need product/stakeholder input
-- Flag assumptions that need validation
+---
 
-> Note: Test scenarios are produced by Agent A — do not re-draft them here.
+## 배경 & 컨텍스트
 
-### Step 4: Assemble and Save the Plan
+코드베이스 컨텍스트 요약 (기존 관련 모듈, 기술 스택 등)
 
-Read `templates/plan.md` and fill each placeholder as follows:
+---
 
-| Placeholder | Source |
-|---|---|
-| `{{FEATURE_NAME}}` | kebab-case feature title |
-| `{{DATE}}` | today's date (YYYY-MM-DD) |
-| `{{GOAL}}` | one-sentence objective from Step 1 |
-| `{{BACKGROUND}}` | codebase context summary from Step 1b |
-| `{{IN_SCOPE}}` | bullet list confirmed in Step 1 |
-| `{{OUT_OF_SCOPE}}` | bullet list confirmed in Step 1 |
-| `{{RISKS_SECTION}}` | full markdown output from Agent A (verbatim) |
-| `{{ALTERNATIVES_SECTION}}` | full markdown output from Agent B (verbatim) |
-| `{{UNITS_SECTION}}` | full markdown output from Agent C (verbatim) |
-| `{{API_DRAFT}}` | drafted in Step 3 |
-| `{{DATA_MODEL_DRAFT}}` | drafted in Step 3 |
-| `{{TEST_SCENARIOS}}` | from Agent A's `### 테스트 시나리오` block |
-| `{{PERFORMANCE_NOTES}}` | drafted in Step 3 |
-| `{{SECURITY_NOTES}}` | drafted in Step 3 |
-| `{{SCALABILITY_NOTES}}` | drafted in Step 3 |
-| `{{OPEN_QUESTIONS}}` | drafted in Step 3 |
+## 범위
 
-**Save location** (in order of preference):
-1. Check if `plans/` exists in the project root → save there
-2. If not, create it with `mkdir -p plans/` → save there
-3. If creation fails (permissions), fall back to `~/.claude/plans/`
-4. If all fail, output the full plan to terminal and warn the user
+**In Scope**
+- ...
 
-**Filename format**: `{kebab-case-feature-name}.md`
+**Out of Scope**
+- ...
 
-After saving, output a concise summary to the terminal:
-- Plan saved location
-- Number of implementation units
-- Top 2–3 risks
+---
+
+{Agent A 리스크 분석 결과 — 그대로 삽입}
+
+---
+
+{Agent B 대안 검토 결과 — 그대로 삽입}
+
+---
+
+## 기능 분해
+
+### 큰 기능 1: {이름}
+> {한 줄 설명}
+
+- **1-1. {작은 기능명}**: {설명}
+- **1-2. {작은 기능명}**: {설명}
+- **1-3. {작은 기능명}**: {설명}
+
+### 큰 기능 2: {이름}
+> {한 줄 설명}
+
+- **2-1. {작은 기능명}**: {설명}
+- **2-2. {작은 기능명}**: {설명}
+
+---
+
+## 구현 순서
+
+의존 관계를 고려한 순서를 명시한다.
+예: 1-1 → 1-2 → 2-1 → 1-3 → 2-2
+
+---
+
+## 미결 사항 (Open Questions)
+
+- ...
+```
+
+Feature decomposition rules:
+- **Big features**: logical groups by domain/concern
+- **Small features**: independently implementable, **reviewable in one sitting** (1-2 day scope)
+- **No code** — descriptions only
+- Each small feature maps 1:1 to one IMPL_PLAN document
+
+After saving, output:
+- Save path
+- Count of big features and small features
+- Top 2-3 risks
 - Recommended approach (one line)
 
-Then ask: **"플랜을 검토해 주세요. 수정하거나 보완할 부분이 있으면 말씀해 주세요."**
+Then ask: **"기능 분해를 검토해 주세요. 수정할 부분이 있으면 말씀해 주세요. 확정되면 각 기능 단위별 구현 계획을 생성합니다."**
 
-## Quality Constraints
+**Do not proceed to Phase 2 until user confirms.**
 
-- **Be critical**: Do not rubber-stamp the user's initial idea. Challenge assumptions.
-- **Be concise**: Each section contains only what is needed — no padding, no repetition.
-- **No over-specification**: API drafts show shape, not full OpenAPI. Data models show structure, not every column constraint.
-- **Small units**: Each implementation unit must be independently reviewable in one sitting.
-- **Honest trade-offs**: Alternative analysis must reflect real trade-offs, not a fake comparison.
+---
+
+### Phase 2: Generate IMPL_PLAN Documents (After User Confirmation)
+
+Once the user confirms the decomposition, generate one IMPL_PLAN per small feature unit.
+
+#### Step 5: Parallel IMPL_PLAN Generation
+
+Spawn one Agent per small feature unit using the Agent tool.
+Independent units run **in parallel**.
+
+Context passed to each agent:
+- `CODEBASE_CONTEXT` (shared — all agents receive the same)
+- `FEATURE_PLAN` content (shared — for understanding relationships between units)
+- `RECOMMENDED_APPROACH` (shared)
+- Specific small feature unit description (individual)
+
+Agent instructions: read `agents/impl-planner.md`.
+
+Each agent generates: `docs/IMPL_PLAN_{feature-id}.md`
+
+Examples:
+- `docs/IMPL_PLAN_1-1.md`
+- `docs/IMPL_PLAN_1-2.md`
+- `docs/IMPL_PLAN_2-1.md`
+
+#### Step 6: Consistency Check
+
+After all agents complete, the parent verifies:
+- No overlapping responsibilities between units
+- Dependency ordering matches FEATURE_PLAN
+- Naming conventions are consistent
+
+Fix any issues found.
+
+#### Step 7: Request Review
+
+Output:
+- List of generated IMPL_PLAN files
+- One-line summary for each
+
+Then ask: **"구현 계획이 생성되었습니다. 각 문서를 검토해 주세요. 확정되면 `/impl`로 구현을 시작합니다."**
+
+## Quality Rules
+
+- Be critical — challenge the user's initial assumptions
+- Each small feature unit must be **independently reviewable** in one sitting
+- No real code in any plan document — Korean descriptions and pseudocode only
+- Every IMPL_PLAN must include a **recommended English commit message**
+- Pseudocode will become inline code comments during `/impl`, so write it clear and concise

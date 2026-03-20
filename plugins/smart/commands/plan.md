@@ -1,5 +1,5 @@
 ---
-description: Critically plan a feature with multi-agent risk analysis, architecture review, and implementation unit breakdown
+description: Plan a feature with multi-agent analysis, decomposition, and implementation plans
 argument-hint: [feature description]
 allowed-tools: [Read, Glob, Grep, Bash, Agent, Write]
 ---
