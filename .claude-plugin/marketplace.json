@@ -7,13 +7,13 @@
   },
   "plugins": [
     {
-      "name": "smart-plan",
+      "name": "smart",
       "description": "Critical, multi-agent feature planning — risk analysis, architecture alternatives, and implementation unit breakdown before writing code",
       "version": "1.0.0",
       "author": {
         "name": "alexgim961101"
       },
-      "source": "./plugins/smart-plan",
+      "source": "./plugins/smart",
       "category": "productivity",
       "strict": false
     }

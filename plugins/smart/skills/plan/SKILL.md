@@ -1,5 +1,5 @@
 ---
-name: smart-plan
+name: plan
 description: >
   Use this skill when the user wants to plan a feature, design a new capability, or think through an implementation before writing code.
   Triggers on phrases like "기획", "계획 세워줘", "어떻게 구현할까", "설계해줘", "플랜 짜줘", "feature plan", "let's plan", "before we implement", or when the user describes a feature and asks how to approach it.
@@ -16,7 +16,7 @@ A critical, multi-agent feature planning skill that produces a structured, human
 - User wants to plan or design a feature
 - User describes a new capability and asks how to approach it
 - User wants to think through trade-offs before implementing
-- User invokes `/smart-plan`
+- User invokes `/plan`
 
 ## Process
 
