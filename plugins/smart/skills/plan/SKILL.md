@@ -43,7 +43,13 @@ Check in order:
 
 Summarize as `CODEBASE_CONTEXT`.
 
-#### Step 3: Launch Analysis Agents (Parallel)
+#### Step 3: Launch Analysis Agents
+
+**Environment Detection:**
+- If you have access to the `Agent` tool → use **Option A** (parallel)
+- If the `Agent` tool is NOT available → use **Option B** (sequential)
+
+**Option A — Parallel (Agent tool available):**
 
 Run two agents **simultaneously** using the Agent tool.
 
@@ -53,7 +59,16 @@ Read `agents/risk-analyst.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE
 **Agent B — Architecture Reviewer**
 Read `agents/arch-reviewer.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
 
-Extract `RECOMMENDED_APPROACH` from Agent B's `### 추천:` block.
+**Option B — Sequential (Agent tool NOT available):**
+
+Perform each analysis inline, one at a time:
+
+1. Read `agents/risk-analyst.md`. Perform the Risk Analysis inline, filling in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}` with the values collected above. Write the result.
+2. Read `agents/arch-reviewer.md`. Perform the Architecture Review inline, filling in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}` with the values collected above. Write the result.
+
+---
+
+Extract `RECOMMENDED_APPROACH` from the Architecture Reviewer's `### 추천:` block.
 If no clear recommendation, use fallback: `"추천 접근법 미확정 — 별도 아키텍처 결정 필요"`
 
 #### Step 4: Generate FEATURE_PLAN.md
@@ -149,18 +164,30 @@ Then ask: **"기능 분해를 검토해 주세요. 수정할 부분이 있으면
 
 Once the user confirms the decomposition, generate one IMPL_PLAN per small feature unit.
 
-#### Step 5: Parallel IMPL_PLAN Generation
+#### Step 5: IMPL_PLAN Generation
 
-Spawn one Agent per small feature unit using the Agent tool.
-Independent units run **in parallel**.
+**Environment Detection:**
+- If you have access to the `Agent` tool → use **Option A** (parallel)
+- If the `Agent` tool is NOT available → use **Option B** (sequential)
 
-Context passed to each agent:
+Context passed to each agent/analysis:
 - `CODEBASE_CONTEXT` (shared — all agents receive the same)
 - `FEATURE_PLAN` content (shared — for understanding relationships between units)
 - `RECOMMENDED_APPROACH` (shared)
 - Specific small feature unit description (individual)
 
+**Option A — Parallel (Agent tool available):**
+
+Spawn one Agent per small feature unit using the Agent tool.
+Independent units run **in parallel**.
 Agent instructions: read `agents/impl-planner.md`.
+
+**Option B — Sequential (Agent tool NOT available):**
+
+For each small feature unit, one at a time:
+1. Read `agents/impl-planner.md`.
+2. Perform the IMPL_PLAN generation inline with the context above.
+3. Save the result before proceeding to the next unit.
 
 Each agent generates: `docs/IMPL_PLAN_{feature-id}.md`
 

@@ -36,7 +36,13 @@ Collect:
 - `IMPL_PLAN`: relevant implementation plan content
 - `SPEC_CONTEXT`: relevant technical spec sections
 
-### Step 2: Launch 3 Review Agents (Parallel)
+### Step 2: Launch Review Agents
+
+**Environment Detection:**
+- If you have access to the `Agent` tool → use **Option A** (parallel)
+- If the `Agent` tool is NOT available → use **Option B** (sequential)
+
+**Option A — Parallel (Agent tool available):**
 
 Run all three agents **simultaneously** using the Agent tool.
 
@@ -48,6 +54,14 @@ Read `agents/quality-reviewer.md`. Fill in `{{CODE_CONTENT}}` and `{{SPEC_CONTEX
 
 **Agent C — Test Reviewer (테스트 & 성능)**
 Read `agents/test-reviewer.md`. Fill in `{{CODE_CONTENT}}` and `{{IMPL_PLAN}}`.
+
+**Option B — Sequential (Agent tool NOT available):**
+
+Perform each review inline, one at a time:
+
+1. Read `agents/alignment-reviewer.md`. Perform the Alignment Review inline, filling in `{{CODE_CONTENT}}` and `{{IMPL_PLAN}}`. Write the result.
+2. Read `agents/quality-reviewer.md`. Perform the Quality Review inline, filling in `{{CODE_CONTENT}}` and `{{SPEC_CONTEXT}}`. Write the result.
+3. Read `agents/test-reviewer.md`. Perform the Test Review inline, filling in `{{CODE_CONTENT}}` and `{{IMPL_PLAN}}`. Write the result.
 
 ### Step 3: Assemble Review Report
 
