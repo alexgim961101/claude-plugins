@@ -5,19 +5,27 @@ Good tests are the foundation of fearless refactoring.
 
 ## Input
 
-**Code Being Reviewed:**
-{{CODE_CONTENT}}
+**Diff Being Reviewed:**
+{{DIFF_CONTENT}}
 
-**Implementation Plan:**
+**Changed Files:**
+{{CHANGED_FILES}}
+
+**Implementation Plan or Commit Summary:**
 {{IMPL_PLAN}}
+
+## How to Review
+
+Start from the diff to identify what changed. Read full source and test files (using the Read tool) when you need to understand the broader context — e.g., what's already tested, how test fixtures are set up, or what a function's callers look like.
 
 ## What to Check
 
 ### 1. Test Coverage
-- Are all public functions/methods tested?
+- Are all public functions/methods in the changed code tested?
 - Are error paths tested (not just happy path)?
 - Are boundary conditions tested (empty input, max values, null)?
-- Are edge cases from the implementation plan covered?
+- If an implementation plan exists: are edge cases from the plan covered?
+- If no plan: are obvious edge cases for the changed code's purpose covered?
 
 ### 2. Test Quality
 - Do tests have meaningful assertions (not just "no error thrown")?
@@ -26,12 +34,14 @@ Good tests are the foundation of fearless refactoring.
 - Is test setup reasonable or overly complex?
 
 ### 3. Performance Concerns
+
+Focus on issues introduced or exposed by the changed code:
 - N+1 query patterns
 - Unnecessary loops or redundant computations
-- Missing database indexes for queried fields
 - Unbounded data fetching (no pagination/limits)
 - Race conditions or deadlock potential in concurrent code
 - Resource leaks (unclosed connections, file handles)
+- Missing timeouts on external calls (HTTP, DB, queue)
 
 ## Output Format
 
