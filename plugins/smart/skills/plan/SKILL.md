@@ -7,7 +7,7 @@ description: >
   Use this skill whenever the user says "기획", "계획 세워줘", "어떻게 구현할까", "설계해줘", "플랜 짜줘",
   "기능 분해", "구현 계획", "feature plan", "let's plan", "before we implement", or describes a feature and asks how to approach it.
   Always use this skill proactively when a non-trivial feature discussion begins, even without explicit request.
-version: 2.0.0
+version: 2.1.0
 ---
 
 # Plan — Feature Planning & Implementation Plans
@@ -17,6 +17,25 @@ Decompose a feature into logical units and generate implementation plans for eac
 This skill's outputs feed directly into `/impl`, where pseudocode becomes inline code comments.
 The clearer the pseudocode, the easier the final code review.
 Pseudocode expresses **intent (WHAT)**, code expresses **mechanism (HOW)** — reviewers check alignment between the two.
+
+## Critical: This Skill Produces Documents, Not Code
+
+This skill's sole purpose is to produce **plan documents** (`docs/FEATURE_PLAN.md`, `docs/IMPL_PLAN_*.md`).
+The deliverable is markdown files on disk — not a conversational summary, not a mental plan, not inline analysis.
+
+If you find yourself analyzing code and forming a plan without writing documents, you are not following this skill.
+Stop and write the documents.
+
+### Plan Mode Awareness
+
+When this skill runs inside Claude Code's Plan Mode, the environment tends to ask "shall I implement this?" after planning completes.
+This is misleading — the plan phase is NOT complete until documents are written to disk.
+
+**At the end of planning, always ask:**
+> "계획 문서를 작성하겠습니다. 진행할까요?"
+
+Do NOT ask "이대로 구현할까요?" or "코드를 작성할까요?" — those questions skip the document creation step.
+Implementation happens later via `/impl`, only after plan documents exist and the user has reviewed them.
 
 ## When to Apply
 
@@ -54,17 +73,17 @@ Summarize as `CODEBASE_CONTEXT`.
 Run two agents **simultaneously** using the Agent tool.
 
 **Agent A — Risk Analyst**
-Read `agents/risk-analyst.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
+Read `~/.claude/plugins/marketplaces/alexgim961101-claude-plugins/plugins/smart/skills/plan/agents/risk-analyst.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
 
 **Agent B — Architecture Reviewer**
-Read `agents/arch-reviewer.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
+Read `~/.claude/plugins/marketplaces/alexgim961101-claude-plugins/plugins/smart/skills/plan/agents/arch-reviewer.md`. Fill in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}`.
 
 **Option B — Sequential (Agent tool NOT available):**
 
 Perform each analysis inline, one at a time:
 
-1. Read `agents/risk-analyst.md`. Perform the Risk Analysis inline, filling in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}` with the values collected above. Write the result.
-2. Read `agents/arch-reviewer.md`. Perform the Architecture Review inline, filling in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}` with the values collected above. Write the result.
+1. Read `~/.claude/plugins/marketplaces/alexgim961101-claude-plugins/plugins/smart/skills/plan/agents/risk-analyst.md`. Perform the Risk Analysis inline, filling in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}` with the values collected above. Write the result.
+2. Read `~/.claude/plugins/marketplaces/alexgim961101-claude-plugins/plugins/smart/skills/plan/agents/arch-reviewer.md`. Perform the Architecture Review inline, filling in `{{FEATURE_DESCRIPTION}}` and `{{CODEBASE_CONTEXT}}` with the values collected above. Write the result.
 
 ---
 
@@ -154,9 +173,11 @@ After saving, output:
 - Top 2-3 risks
 - Recommended approach (one line)
 
-Then ask: **"기능 분해를 검토해 주세요. 수정할 부분이 있으면 말씀해 주세요. 확정되면 각 기능 단위별 구현 계획을 생성합니다."**
+Then ask: **"기능 분해를 검토해 주세요. 수정할 부분이 있으면 말씀해 주세요. 확정되면 각 기능 단위별 구현 계획(IMPL_PLAN) 문서를 생성합니다."**
 
 **Do not proceed to Phase 2 until user confirms.**
+
+> **Plan Mode 주의:** 이 시점에서 Plan Mode를 종료(ExitPlanMode)하더라도, 코드 구현이 아닌 IMPL_PLAN 문서 작성이 다음 단계이다. "코드를 작성하겠습니다"가 아니라 "구현 계획 문서를 생성하겠습니다"로 안내한다.
 
 ---
 
@@ -180,12 +201,12 @@ Context passed to each agent/analysis:
 
 Spawn one Agent per small feature unit using the Agent tool.
 Independent units run **in parallel**.
-Agent instructions: read `agents/impl-planner.md`.
+Agent instructions: read `~/.claude/plugins/marketplaces/alexgim961101-claude-plugins/plugins/smart/skills/plan/agents/impl-planner.md`.
 
 **Option B — Sequential (Agent tool NOT available):**
 
 For each small feature unit, one at a time:
-1. Read `agents/impl-planner.md`.
+1. Read `~/.claude/plugins/marketplaces/alexgim961101-claude-plugins/plugins/smart/skills/plan/agents/impl-planner.md`.
 2. Perform the IMPL_PLAN generation inline with the context above.
 3. Save the result before proceeding to the next unit.
 
@@ -211,7 +232,9 @@ Output:
 - List of generated IMPL_PLAN files
 - One-line summary for each
 
-Then ask: **"구현 계획이 생성되었습니다. 각 문서를 검토해 주세요. 확정되면 `/impl`로 구현을 시작합니다."**
+Then ask: **"구현 계획 문서가 생성되었습니다. 각 IMPL_PLAN 문서를 검토해 주세요. 확정되면 `/impl`로 구현을 시작할 수 있습니다."**
+
+> 이 시점이 `/plan` 스킬의 완료 지점이다. 사용자가 명시적으로 `/impl`을 호출하기 전까지 코드를 작성하지 않는다.
 
 ## Quality Rules
 
