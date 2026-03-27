@@ -9,7 +9,7 @@
     {
       "name": "smart",
       "description": "Full development workflow — PRD, tech spec, feature planning, TDD implementation, and multi-agent code review, all optimized for human reviewability",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "author": {
         "name": "alexgim961101"
       },
