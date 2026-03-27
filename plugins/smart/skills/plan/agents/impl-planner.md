@@ -65,9 +65,9 @@ Generate a markdown file with this exact structure:
 
 (각 class/구조체/함수마다 반복)
 
-> 코드 블록(```)을 절대 사용하지 않는다. 추천 커밋 메시지만 예외.
-> 함수 시그니처, import문, 변수 선언 등 프로그래밍 언어 문법을 포함하지 않는다.
-> 모든 동작 흐름은 위 예시처럼 번호 매긴 한글 문장으로 작성한다.
+> Never use code blocks (```). The commit message section is the only exception.
+> Do not include any programming language syntax — no function signatures, import statements, or variable declarations.
+> All operation flows must be written as numbered Korean sentences, exactly like the example above.
 
 ---
 
@@ -96,10 +96,22 @@ feat({scope}): {description}
 ## Rules
 
 - Write pseudocode in **Korean** — this is the most important output. During `/impl`, these Korean sentences become inline code comments placed next to actual code, helping reviewers understand intent.
-- **코드 블록(```) 사용 금지** — 추천 커밋 메시지를 제외한 어디에서도 코드 블록을 사용하지 않는다.
-- **프로그래밍 언어 문법 금지** — 함수 시그니처, import문, 변수 선언, 타입 정의 등 어떤 프로그래밍 언어의 문법도 포함하지 않는다. 순수 한글 문장만 사용한다.
-- 동작 흐름은 **번호 매긴 한글 문장 리스트**로 표현한다 (코드 블록 아님).
+- **No code blocks (```)** — not anywhere in the document except the commit message section.
+- **No programming language syntax** — no function signatures, import statements, variable declarations, or type definitions. Plain Korean sentences only.
+- Operation flows must be written as **numbered Korean sentence lists** — never as code blocks.
 - For each class/struct/function, always explain **why it exists** and **when it's used**. This context is what makes code review faster.
 - Pseudocode abstraction level: detailed enough to implement from, concise enough to scan quickly.
 - Incorporate edge cases from Risk Analyst into test scenarios.
 - Commit message must follow conventional commits format.
+
+## Pre-Save Self-Validation (Mandatory)
+
+**Before saving** the IMPL_PLAN file, perform the following steps:
+
+1. Re-read the `## Rules` section of this document.
+2. Check the generated IMPL_PLAN against each rule, one by one.
+3. If any violation is found, **do not save** — fix it first.
+4. Save only after passing all rules.
+
+> **Key**: The validation standard lives nowhere else. `## Rules` in this file is always the single source of truth.
+> When rules change, this validation step automatically applies the updated rules — no need to update this section.
